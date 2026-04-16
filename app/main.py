@@ -1,5 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 import shutil
 import bcrypt
@@ -10,9 +10,10 @@ app = FastAPI()
 # Upload Endpoints
 ##################
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 def read_root():
-    return {"Hello": "World"}
+    with open("index.html", "r") as f:
+        return f.read()
 
 #Creates a new endpoint that accepts POST requests at the path "/upload/".
 @app.post("/upload/")

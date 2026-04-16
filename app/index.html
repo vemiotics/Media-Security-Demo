@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Music Media Server Demo</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; max-width: 600px; }
+        section { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px; }
+        input { display: block; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Music Media Server</h1>
+
+    <!-- Registration Section -->
+    <section>
+        <h3>1. Register</h3>
+        <input type="text" id="regUser" placeholder="Username">
+        <input type="password" id="regPass" placeholder="Password">
+        <button onclick="register()">Register</button>
+    </section>
+
+    <!-- Upload Section -->
+    <section>
+        <h3>2. Upload Music</h3>
+        <input type="text" id="uploadUser" placeholder="Your Username">
+        <input type="file" id="musicFile">
+        <button onclick="upload()">Upload MP3</button>
+    </section>
+
+    <!-- Retrieval Section -->
+    <section>
+        <h3>3. Play/Download</h3>
+        <input type="text" id="getUser" placeholder="Your Username">
+        <input type="text" id="fileName" placeholder="filename.mp3">
+        <button onclick="fetchFile()">Access File</button>
+        <div id="player"></div>
+    </section>
+
+    <script>
+        const API_BASE = "http://localhost:8000";
+
+        // Register a user [Source 22, 50]
+        async function register() {
+            const user = document.getElementById('regUser').value;
+            const pass = document.getElementById('regPass').value;
+            const response = await fetch(`${API_BASE}/register/?username=${user}&password=${pass}`, { method: 'POST' });
+            const data = await response.json();
+            alert(data.message || data.detail);
+        }
+
+        // Upload a file (Requires username) [Source 24, 48]
+        async function upload() {
+            const user = document.getElementById('uploadUser').value;
+            const fileInput = document.getElementById('musicFile');
+            const formData = new FormData();
+            formData.append("file", fileInput.files);
+
+            const response = await fetch(`${API_BASE}/upload/?username=${user}`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            alert("Uploaded: " + data.filename);
+        }
+
+        // Retrieve and Play File (Requires username) [Source 25, 49]
+        function fetchFile() {
+            const user = document.getElementById('getUser').value;
+            const file = document.getElementById('fileName').value;
+            const url = `${API_BASE}/files/${file}?username=${user}`;
+            
+            // Simple display logic to play the audio in the browser
+            document.getElementById('player').innerHTML = `
+                <p>Accessing ${file}...</p>
+                <audio controls>
+                    <source src="${url}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+                <br><a href="${url}" target="_blank">Direct Download Link</a>`;
+        }
+    </script>
+</body>
+</html>
